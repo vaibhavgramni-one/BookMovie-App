@@ -13,6 +13,30 @@
   }
 }
 
+.seats {
+  margin-top: 50px;
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(5,1fr);
+}
+
+.seat {
+  padding: 4px;
+  border: 2px solid blue;
+  margin : 0 auto;
+  border-radius: 5px;
+  width: 200px;
+  margin-bottom: 2px;
+}
+
+input[type=checkbox] {
+  outline: 2px solid black;
+}
+
+input:checked {
+  outline: 3px solid green;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

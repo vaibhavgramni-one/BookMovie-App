@@ -1,3 +1,7 @@
+body {
+  font-family: sans-serif;
+}
+
 .App {
   text-align: center;
 }
@@ -7,10 +11,63 @@
   pointer-events: none;
 }
 
+#seat-reservation {
+  padding: 10px;
+  width: 150px;
+  margin-top: 20px;
+  background-color: darkgray;
+  color: white;
+  font-weight: bolder; 
+  border-radius: 5px;
+
+}
+
+.seat-label {
+  font-weight: bolder;
+  text-transform: uppercase;
+}
+
+.available {
+  color: green;
+}
+
+.booked {
+  color: red;
+}
+
+#seat-reservation:hover {
+  color: black;
+  background-color: white;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+}
+
+.seats {
+  margin-top: 50px;
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(5,1fr);
+}
+
+.seat {
+  padding: 15px;
+  border: 2px solid blue;
+  margin : 0 auto;
+  border-radius: 5px;
+  width: 200px;
+  margin-bottom: 2px;
+}
+
+input[type=checkbox] {
+  outline: 2px solid black;
+}
+
+input:checked {
+  outline: 3px solid green;
 }
 
 .App-header {

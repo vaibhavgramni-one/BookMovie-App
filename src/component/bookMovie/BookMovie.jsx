@@ -1,5 +1,8 @@
 import { useState , useEffect } from "react"
 import Axios from 'axios';
+import { ChooseMovie } from './ChooseMovie';
+import { SelectSeats } from './SelectSeats';
+import { generateSeats } from './utilities/BookUtility';
 
 export const BookMovie = () => {
     const [bookMovieData , setBookMovieData] = useState(null);
@@ -13,7 +16,6 @@ export const BookMovie = () => {
 
         Axios.get(api_url)
         .then((res) => {
-            console.log(res.data.data);
             setBookMovieData(res.data.data);
         })
         .catch((err) => {
@@ -21,15 +23,9 @@ export const BookMovie = () => {
         })
     }, [])
 
+    
     const setSeatsForMovie = () => {
-        console.log('n',selectedMovie);
-
-        const generatedSeats = Array.from({ length: selectedMovie.seats }, (_, index) => ({
-            seatNumber: index + 1,
-            booked: selectedMovie.bookedSeats.includes(index + 1), // Check if the seat number is in bookedSeats array
-        }));
-        
-        console.log(generatedSeats);
+        const generatedSeats = generateSeats(selectedMovie);
         setSeats(generatedSeats);
     }
 
@@ -37,19 +33,20 @@ export const BookMovie = () => {
         if (selectedMovie !== '') {
           setSeatsForMovie(selectedMovie);
         }
-      }, [selectedMovie]);
+    }, [selectedMovie]);
 
     const handleMovieChange = (event) => {
+        console.log('performing handleMovieChange...');
+        
         const selected = event.target.value;
-    
-        const selectedMovie = bookMovieData.find((movieData) => movieData.movieName === selected)
-
-        console.log('s',selectedMovie)
+        const selectedMovie = bookMovieData.find((movieData) => movieData.movieName === selected);
 
         setSelectedMovie(selectedMovie);
     }
 
     const handleSeatSelection = (seatNo) => {
+        console.log('performing handleSeatSelection...');
+
         const index = selectedSeat.indexOf(seatNo);
         if(index !== -1){
             const updatedSeats = [...selectedSeat]
@@ -60,78 +57,58 @@ export const BookMovie = () => {
         }
     }
 
-    const seatsReservation = () => {
-        console.log('seats selected for reservation are : ');
-        console.log('selected Movie : ',selectedMovie);
-        console.log(selectedSeat);
-        let updatedMovieData = {
-            ...selectedMovie , bookedSeats : selectedSeat
+    const seatsReservation = async () => {
+        console.log('performing seat reservation operation... ');
+        
+        const newSelectedSeats = [...selectedMovie.bookedSeats , ...selectedSeat]
+
+        alert(`
+        Hello User, Welcome to Movie-Book Platform \n
+        MovieName : ${selectedMovie.movieName} \n
+        Seats Booked : ${selectedSeat.map((seat) => ` ${seat} `)} \n
+        Total Cost : ${selectedSeat.length * selectedMovie.cost} \n
+        `)
+       
+        const api_url = `http://127.0.0.1:5000/api/movie/${selectedMovie._id}`
+        const dataToUpdate = {
+            bookedSeats : newSelectedSeats
         }
-        console.log('up :', updatedMovieData);
 
-        let filter = {
-            movieName : updatedMovieData.movieName
-        }
-
-        const encodedSearch = encodeURIComponent(JSON.stringify(filter));
-
-        const api_url = `http://127.0.0.1:5000/api/movie?search=${encodedSearch}`
-
-        Axios.put(api_url)
-        .then((res) => {
-            console.log(res);
-        })
-        .catch((err) => {
-            console.log(err);
-        })
+        const updatedMovie = await Axios.put(api_url , dataToUpdate)
+        console.log(updatedMovie);
+        //TODO
+        // add navigate to HOME page
     }
 
     return (
         <div>
             <h1>Book Movie</h1>
-            {bookMovieData ? (
-                <div>
-
-                <select value={selectedMovie} onChange={handleMovieChange}>
-                    <option value="">Select a movie</option> 
-                    {   
-                        
-                        bookMovieData.map((movieRecord , index) => {
-                            return (
-                                <option key={index} value={movieRecord.movieName}>{movieRecord.movieName}</option>
-                            )
-                        })
-                    }
-                   
-                </select>
-            </div>
-            ) : (
-                <h1>No Movie Data Found !!</h1>
-            )}
-
-            {/* Add bottom layout design for seats */}
+            {
+                bookMovieData
+                ? (<ChooseMovie selectedMovie={selectedMovie} bookMovieData={bookMovieData} handleMovieChange={handleMovieChange}/>) 
+                : (<h1>No Movie Data Found !!</h1>)
+            }
             {   seats && (
+                <>
+                <h1>Movie Selected : {selectedMovie.movieName}</h1>
+                
                 <div className='seats'>
-                    {seats.map((seat) => (
-                        <>
-                        <div className="seat">
-                          <label
-                            key={seat.seatNumber}
-                            className={`seat-label ${seat.booked ? 'booked' : 'available'}`}
-                          >
-                            <input
-                            key={seat.seatNumber} 
-                            type="checkbox" 
-                            style={{outline : seat.booked ? '3px solid red' : '3px solid green'}} 
-                            disabled={seat.booked}
-                            onChange={() => handleSeatSelection(seat.seatNumber)} />
-                            Seat {seat.seatNumber}
-                          </label>
-                        </div>
-                        </>
-                    ))}
-                    <button onClick={seatsReservation}>Book Seats</button>
-                </div>   
+                    {
+                        seats.map((seat) => 
+                        (
+                            <SelectSeats seat={seat} handleSeatSelection={handleSeatSelection}/>
+                        ))
+                    }
+                </div>
+
+                <button 
+                    disabled={ !selectedSeat.length }  
+                    id="seat-reservation" 
+                    onClick={seatsReservation}
+                >
+                Book Seats
+                </button>
+                </>   
             )}
         </div>
     )

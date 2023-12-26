@@ -14,17 +14,11 @@ export const Form = () => {
         resolver : yupResolver(schema),
     });
 
-    const onSubmit = (data) => {
-        console.log(data);
+    const onSubmit = async (data) => {
         // make API call
         const api_url = 'http://127.0.0.1:5000/api/movie'
-        Axios.post(api_url , data)
-        .then((res) => {
-            console.log('Response : ',res);
-        })
-        .catch((err) => {
-            console.log('Error : ',err);
-        })
+        const result = await Axios.post(api_url , data)
+        console.log(result);
     }
 
     return (
